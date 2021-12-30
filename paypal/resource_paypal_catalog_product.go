@@ -152,19 +152,29 @@ func (r CatalogProductResource) Update(d *schema.ResourceData, m interface{}) er
 }
 
 // Delete - Delete the a catalog product in Paypal - Products cannot be deleted
-// so we will update the name with a DELETED suffix and remove our reference to it
+// so we will update the name with a (removed) suffix and remove our reference to it
 func (r CatalogProductResource) Delete(d *schema.ResourceData, m interface{}) error {
-	originalName := d.Get("name").(string)
-	name := fmt.Sprintf("%s (removed)", d.Get("name").(string))
-	d.Set("name", name)
-	err := r.Update(d, m)
-	if err != nil {
-		log.Printf("Error updating catalog product with deleted name %s: %s", d.Id(), err.Error())
-		d.Set("name", originalName)
-		return err
+	client := m.(*paypalSdk.Client)
+
+	// Get the current product
+	product, getErr := client.GetProduct(context.Background(), d.Id())
+	if getErr != nil {
+		log.Printf("Error getting catalog product %s: %s", d.Id(), getErr.Error())
+		return getErr
 	}
 
-	// Even though we can't delete it, we can remove our id reference
+	// Update the name
+	product.Name = fmt.Sprintf("(removed) %s", product.Name)
+	product.Description = fmt.Sprintf("(removed) %s", product.Description)
+
+	// Push the updated plan
+	updateErr := client.UpdateProduct(context.Background(), *product)
+	if updateErr != nil {
+		log.Printf("Error updating to mark as removed catalog product %s: %s", d.Id(), updateErr.Error())
+		return updateErr
+	}
+
+	// Remove our ID reference
 	d.SetId("")
 
 	return nil
