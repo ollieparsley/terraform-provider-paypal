@@ -1,63 +1,3 @@
-# Terraform PayPal Provider
-PayPal terraform provider for managing merchant data such as products, subscription plans and webhooks
-
-## Requirements
-
-*	[Terraform](https://www.terraform.io/downloads.html) 0.11.x to 0.13.x
-*	[Go](https://golang.org/doc/install) 1.12 to 1.17 (to build the provider plugin)
-
-## Build
-
-Clone repository anywhere:
-
-```sh
-$ git clone https://github.com/ollieparsley/terraform-provider-paypal.git
-```
-
-Enter the provider directory and build the provider
-
-```sh
-$ cd terraform-provider-paypal
-$ make compile
-```
-
-Or alternatively, to install it as a plugin, run
-
-```sh
-$ cd terraform-provider-paypal
-$ make install
-```
-
-## Using the provider
-
-If you're building the provider, follow the instructions to [install it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) After placing it into your plugins directory,  run `terraform init` to initialize it.
-
-### Basic Usage
-
-Set the following environment variables, `TF_VAR_paypal_client_id` to store your PayPal OAuth client credentials. This is the recommended way to not commit an access token into your version control system.
-
-    export TF_VAR_paypal_client_id=<your paypal oauth client ID>
-    export TF_VAR_paypal_client_secret=<your paypal oauth client secret>
-
-These variables are then accessible in your Terraform configuration as
-`var.paypal_client_id` and `var.paypal_client_secret`, and can be used to configure the provider. See the examples below for a full usage.
-
-The example below demonstrates the following operations:
-
-  * create a catalog product
-  * create a subscription plan for that product
-  * create a notification webhook endpoint listening to events
-
-```hcl
-terraform {
-  required_providers {
-    stripe = {
-      source = "ollieparsley/paypal"
-      version = "<SEE GITHUB RELEASES FOR THE LATEST VERSION>"
-    }
-  }
-}
-
 variable "paypal_client_id" {
     type = string
 }
@@ -162,6 +102,3 @@ resource "paypal_subscription_plan" "my_awesome_product_monthly_usd" {
     }
   }
 }
-
-
-```
